@@ -12,3 +12,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     ${PROJECT_NAME}
     GTest::gtest_main
 )
+
+include(GoogleTest)
+gtest_add_tests(TARGET ${TARGET_NAME})
