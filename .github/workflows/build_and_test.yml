@@ -25,6 +25,8 @@ jobs:
     #Install dependencies
     - name: Install dependencies
       run: |
+        sudo apt-get update -y
+        sudo apt-get install -y
         sudo apt install libboost-dev
         sudo apt install libgtest-dev
    
