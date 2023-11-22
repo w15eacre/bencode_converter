@@ -11,4 +11,6 @@ target_include_directories(${PROJECT_NAME} INTERFACE
     ${INCLUDE_DIR}
 )
 
+enable_testing()
+
 add_subdirectory(test)
