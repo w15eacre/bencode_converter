@@ -1,0 +1,199 @@
+BasedOnStyle: Mozilla
+AccessModifierOffset: -4
+AlignAfterOpenBracket: AlwaysBreak
+AlignArrayOfStructures: None
+AlignConsecutiveAssignments: None
+AlignConsecutiveBitFields: None
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: false
+AlignEscapedNewlines : Right
+AlignOperands: DontAlign
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: true
+AllowAllConstructorInitializersOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine : Empty
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: Yes
+#AttributeMacros: <inherit>
+BinPackArguments: false
+BinPackParameters: false
+BitFieldColonSpacing: Both
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakBeforeTernaryOperators: false	
+BreakBeforeConceptDeclarations: true
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+BreakStringLiterals: false
+ColumnLimit: 140
+#CommentPragmas: <inherit>
+CompactNamespaces: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+Cpp11BracedListStyle: true
+DeriveLineEnding: false
+DerivePointerAlignment: true
+DisableFormat: false
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: Never
+ExperimentalAutoDetectBinPacking: false
+FixNamespaceComments: true
+#ForEachMacros: <inherit>
+#IfMacros: <inherit>
+IncludeBlocks: Preserve
+#IncludeCategories: <inherit>
+#IncludeIsMainRegex: <inherit>
+#IncludeIsMainSourceRegex: <inherit>
+IndentAccessModifiers: false
+IndentCaseBlocks: false
+IndentCaseLabels: true
+IndentExternBlock: NoIndent
+IndentGotoLabels: false
+IndentWidth: 4
+IndentPPDirectives: None
+IndentRequires: false
+IndentWrappedFunctionNames: false
+InsertTrailingCommas: None
+KeepEmptyLinesAtTheStartOfBlocks: false
+LambdaBodyIndentation: OuterScope
+Language: Cpp
+MacroBlockBegin: >
+  EKA_INTERFACE_MAP_BEGIN|
+  EKA_LEGACY_SERIALIZABLE_BEGIN_GENERIC|
+  EKA_METAINFO_DESCRIPTORS_MAP_BEGIN_EX|
+  EKA_OBJECT_FACTORY_BEGIN|
+  EKA_PROXY_STUB_FACTORIES_MAP_BEGIN_EX|
+  EKA_SERIALIZABLE_BEGIN_NS|
+  mEXTERNAL_TABLE_BEGIN|
+  mINTERNAL_TABLE_BEGIN|
+  mpPROPERTY_TABLE\(
+MacroBlockEnd: >
+  EKA_INTERFACE_MAP_END|
+  EKA_METAINFO_DESCRIPTORS_MAP_END|
+  EKA_OBJECT_FACTORY_END|
+  EKA_PROXY_STUB_FACTORIES_MAP_END|
+  EKA_SERIALIZABLE_END|
+  mEXTERNAL_TABLE_END|
+  mINTERNAL_TABLE_END|
+  mpPROPERTY_TABLE_END
+MaxEmptyLinesToKeep: 2
+NamespaceIndentation: None
+#NamespaceMacros: <inherit>
+PPIndentWidth: 4
+#PenaltyBreakAssignment: <inherit>
+#PenaltyBreakBeforeFirstCallParameter: <inherit>
+#PenaltyBreakComment: <inherit>
+#PenaltyBreakFirstLessLess: <inherit>
+#PenaltyBreakString: <inherit>
+#PenaltyBreakTemplateDeclaration: <inherit>
+#PenaltyExcessCharacter: <inherit>
+#PenaltyIndentedWhitespace: <inherit>
+PenaltyReturnTypeOnItsOwnLine: 1000000
+PointerAlignment: Left
+#RawStringFormats: <inherit>
+ReferenceAlignment: Left
+ReflowComments: true
+ShortNamespaceLines: 1
+SortIncludes: true
+SortUsingDeclarations: false
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAroundPointerQualifiers: Default
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false 
+SpaceBeforeInheritanceColon: true
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: Never
+SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: false
+SpacesInContainerLiterals: false
+SpaceInEmptyBlock: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: 1
+Standard: Latest
+#StatementAttributeLikeMacros: <inherit>
+StatementMacros: [
+    "__drv_maxIRQL",
+    "__drv_sameIRQL",
+    'EXTERN_C',
+  ]
+TabWidth: 4
+#TypenameMacros: <inherit>
+UseCRLF: false
+UseTab: Never
+IncludeCategories:
+  # Headers for eka check
+  - Regex:           '<eka.+>'
+    Priority:        7
+  # Headers for Qt Wayland
+  - Regex:           '<QtWayland.+>'
+    Priority:        8
+  # Headers for Qt
+  - Regex:           '<Q.+>'
+    Priority:        9
+  # Headers for gtest and gmock
+  - Regex:           '(gtest|gmock).+'
+    Priority:        10
+  # Headers for component
+  - Regex:           '<component/.+\.h>'
+    Priority:        1
+  # Headers for shared/common
+  - Regex:           '<shared/common/.+\.h>'
+    Priority:        2
+  # Headers for shared/common_utils
+  - Regex:           '<shared/common_utils/.+\.h>'
+    Priority:        3
+  # Headers for shared/common_utils_ui
+  - Regex:           '<shared/common_utils_ui/.+\.h>'
+    Priority:        4
+  # Headers for shared/common_client_ui
+  - Regex:           '<shared/common_client_ui/.+\.h>'
+    Priority:        5
+  # Headers for shared/common_client_ui
+  - Regex:           '<shared/.+\.h>'
+    Priority:        6
+  # Headers in "" with extension.
+  - Regex:           '".+"'
+    Priority:        0
+  # Headers in <> with extension.
+  - Regex:           '<.+\.h>'
+    Priority:        11
+  # Headers in <> without extension.
+  - Regex:           '<.+>'
+    Priority:        12
