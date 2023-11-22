@@ -2,9 +2,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <charconv>
 #include <concepts>
 #include <exception>
-#include <format>
 #include <map>
 #include <string>
 #include <string_view>
@@ -190,7 +190,8 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseInt(It b
 {
     if (*begin != type_traits::BencodeTypeTraits<T>::GetIntToken())
     {
-        throw std::invalid_argument(std::format("Expected the bencode format: i<number>e, actualy - {}", std::string_view(begin, end)));
+        // throw std::invalid_argument(std::format("Expected the bencode format: i<number>e, actualy - {}", std::string_view(begin, end)));
+        throw std::invalid_argument("Expected the bencode format: i<number>e, actualy"); // Compatibility with GCC 11
     }
 
     constexpr auto IsDigit = [](auto ch) -> bool {
@@ -200,8 +201,9 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseInt(It b
     auto firstDigit = std::find_if(begin, end, IsDigit);
     if (firstDigit == end)
     {
-        throw std::invalid_argument(
-            std::format("Expected at least one digit, actualy - digit not found - {}", std::string_view(begin, end)));
+        // throw std::invalid_argument(
+        // std::format("Expected at least one digit, actualy - digit not found - {}", std::string_view(begin, end)));
+        throw std::invalid_argument("Expected at least one digit, actualy - digit not found"); // Compatibility with GCC 11
     }
 
     typename type_traits::BencodeTypeTraits<T>::IntType result{};
@@ -243,7 +245,8 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseList(It 
 {
     if (*begin != type_traits::BencodeTypeTraits<T>::GetListToken())
     {
-        throw std::invalid_argument(std::format("Expected the bencode format: i<number>e, actualy - {}", std::string_view(begin, end)));
+        //throw std::invalid_argument(std::format("Expected the bencode format: i<number>e, actualy - {}", std::string_view(begin, end)));
+        throw std::invalid_argument("Expected the bencode format: i<number>e, actualy"); // Compatibility with GCC 11
     }
 
     typename type_traits::BencodeTypeTraits<T>::ListType list{};
@@ -281,7 +284,8 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> Parse(It begi
         return ParseString<T>(begin, end);
     }
 
-    throw std::invalid_argument(std::format("Unexpected symbol - {}", *begin));
+    //throw std::invalid_argument(std::format("Unexpected symbol - {}", *begin));
+    throw std::invalid_argument("Unexpected symbol"); // Compatibility with GCC 11
 }
 
 } // namespace details
@@ -297,7 +301,8 @@ type_traits::BencodeTypeTraits<T>::Variant Parse(std::string_view data)
     auto [it, value] = details::Parse<T>(std::cbegin(data), std::cend(data));
     if (it != std::cend(data))
     {
-        throw std::invalid_argument(std::format("Failed to parse bencode: ", data));
+        //throw std::invalid_argument(std::format("Failed to parse bencode: ", data));
+        throw std::invalid_argument("Failed to parse bencode"); // Compatibility with GCC 11
     }
 
     return value;
