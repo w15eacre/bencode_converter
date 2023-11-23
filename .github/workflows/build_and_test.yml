@@ -27,10 +27,9 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install -y
-        sudo apt install libboost-dev
-        sudo apt install libgtest-dev
-        sudo apt install libfmt-dev
-        sudo apt install lib
+        sudo apt install libboost-dev -y
+        sudo apt install libgtest-dev -y
+        sudo apt install libfmt-dev -y
    
     - name: Set up GCC
       uses: egor-tensin/setup-gcc@v1
