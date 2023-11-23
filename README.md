@@ -7,6 +7,7 @@ The header-only library to parse bencode
 
 - [ ] Implements Hono/Getero container for the List
 - [ ] Implements Hono/Getero container for The Dict
+- [ ] Concept of BaseType::Dict and BaseType::Str
 - [ ] Tests
     - [X] type_traits
     - [X] details
