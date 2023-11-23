@@ -319,6 +319,48 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseList(It 
 }
 
 template <type_traits::BencodeTypeConcept T, std::forward_iterator It>
+std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseDict(It begin, It end)
+{
+    try
+    {
+        if (begin == end)
+        {
+            throw std::invalid_argument("The input value must not be empty.");
+        }
+
+        constexpr type_traits::TokenConcept auto DictToken = type_traits::BencodeTypeTraits<T>::GetDictToken();
+        if (*begin != DictToken)
+        {
+            throw std::invalid_argument(
+                Format("Expected the first letter '{}', actually {}", DictToken.Token, std::string_view(begin, end)));
+        }
+
+        typename type_traits::BencodeTypeTraits<T>::DictType dictinary{};
+
+        constexpr type_traits::TokenConcept auto EndToken = type_traits::BencodeTypeTraits<T>::GetEndToken();
+
+        std::advance(begin, 1);
+        while (*begin != EndToken)
+        {
+            const auto [keyEndIt, keyVariant] = ParseString<T>(begin, end);
+            const auto [valueEndIt, valueVariant] = Parse<T>(keyEndIt, end);
+
+            dictinary.insert(std::pair<typename type_traits::BencodeTypeTraits<T>::StrType, T>(
+                std::get<typename type_traits::BencodeTypeTraits<T>::StrType>(keyVariant), valueVariant));
+
+            begin = valueEndIt;
+        }
+
+        return std::make_pair(std::next(begin), std::move(dictinary));
+    }
+    catch (...)
+    {
+        std::throw_with_nested(
+            std::runtime_error(Format("{}:{}:Failed to parse dict value: {}", __FUNCTION__, __LINE__, std::string_view(begin, end))));
+    }
+}
+
+template <type_traits::BencodeTypeConcept T, std::forward_iterator It>
 std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> Parse(It begin, It end)
 {
     try

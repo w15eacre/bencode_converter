@@ -1,6 +1,10 @@
 #include <bencode_parser.h>
 
 #include <algorithm>
+#include <iterator>
+#include <string>
+#include <string_view>
+#include <variant>
 
 #include <gtest/gtest.h>
 
@@ -163,4 +167,13 @@ TEST(BencodeParserTest, ParseListWhenInvalidParam)
 {
     constexpr std::string_view TestList = "l5:jelly4:cake8:custard";
     ASSERT_ANY_THROW(bencode::details::ParseList<bencode::BaseType>(std::cbegin(TestList), std::cend(TestList)));
+}
+
+TEST(BencodeParserTest, ParseStringDict)
+{
+    constexpr std::string_view TestDict = "d4:name5:cream5:pricei100ee";
+
+    const auto [it, value] = bencode::details::ParseDict<bencode::BaseType>(std::cbegin(TestDict), std::cend(TestDict));
+    ASSERT_EQ(it, std::cend(TestDict));
+    // TODO(oleg.kuznetsov@internet.ru) Add check value
 }
