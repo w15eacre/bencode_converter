@@ -37,7 +37,7 @@ template <typename Token>
 concept HasTokenType = requires { typename Token::Type; };
 
 template <typename Token>
-concept HasTokenValue = requires(Token token) { requires std::same_as<decltype(token.token), char>; };
+concept HasTokenValue = requires(Token token) { requires std::same_as<std::remove_cvref_t<decltype(token.Token)>, char>; };
 
 template <typename Token>
 concept TokenConcept = requires {
@@ -190,6 +190,11 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseInt(It b
 {
     try
     {
+        if (begin == end)
+        {
+            throw std::invalid_argument("The input value must not be empty.");
+        }
+
         constexpr type_traits::TokenConcept auto IntToken = type_traits::BencodeTypeTraits<T>::GetIntToken();
         if (*begin != IntToken)
         {
@@ -227,6 +232,11 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseString(I
 {
     try
     {
+        if (begin == end)
+        {
+            throw std::invalid_argument("The input value must not be empty.");
+        }
+
         size_t sizeOf{};
         auto [sepIt, error] = std::from_chars(begin, end, sizeOf);
 
@@ -247,12 +257,17 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseString(I
         }
 
         auto endIt = std::next(sepIt, sizeOf + 1);
+        if (endIt > end)
+        {
+            throw std::invalid_argument(Format("Incomplete payload"));
+        }
 
         return std::make_pair(endIt, typename type_traits::BencodeTypeTraits<T>::StrType{std::next(sepIt), endIt});
     }
     catch (...)
     {
-        std::throw_with_nested(std::runtime_error(Format("{}:{}:Failed to parse string value: {}", __FUNCTION__, __LINE__, std::string_view(begin, end))));
+        std::throw_with_nested(
+            std::runtime_error(Format("{}:{}:Failed to parse string value: {}", __FUNCTION__, __LINE__, std::string_view(begin, end))));
     }
 }
 
@@ -264,6 +279,11 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseList(It 
 {
     try
     {
+        if (begin == end)
+        {
+            throw std::invalid_argument("The input value must not be empty.");
+        }
+
         constexpr type_traits::TokenConcept auto ListToken = type_traits::BencodeTypeTraits<T>::GetListToken();
         if (*begin != ListToken)
         {
@@ -293,7 +313,8 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseList(It 
     }
     catch (...)
     {
-        std::throw_with_nested(std::runtime_error(Format("{}:{}:Failed to parse list value: {}", __FUNCTION__, __LINE__, std::string_view(begin, end))));
+        std::throw_with_nested(
+            std::runtime_error(Format("{}:{}:Failed to parse list value: {}", __FUNCTION__, __LINE__, std::string_view(begin, end))));
     }
 }
 
@@ -304,7 +325,7 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> Parse(It begi
     {
         if (begin == end)
         {
-            throw std::invalid_argument("Empty string");
+            throw std::invalid_argument("The input value must not be empty.");
         }
 
         if (*begin == type_traits::BencodeTypeTraits<T>::GetIntToken())
@@ -328,7 +349,8 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> Parse(It begi
     }
     catch (...)
     {
-        std::throw_with_nested(std::runtime_error(Format("{}:{}:Failed to parse Bencode value: {}", __FUNCTION__, __LINE__, std::string_view(begin, end))));
+        std::throw_with_nested(
+            std::runtime_error(Format("{}:{}:Failed to parse Bencode value: {}", __FUNCTION__, __LINE__, std::string_view(begin, end))));
     }
 }
 
@@ -342,11 +364,6 @@ using BenCodeVariantView = type_traits::BencodeTypeTraits<BaseTypeView>::Variant
 template <type_traits::BencodeTypeConcept T>
 type_traits::BencodeTypeTraits<T>::Variant Parse(std::string_view data)
 {
-    if (data.empty())
-    {
-        throw std::invalid_argument("Failed to parse bencode value: passed empty value");
-    }
-
     auto [it, value] = details::Parse<T>(std::cbegin(data), std::cend(data));
     if (it != std::cend(data))
     {

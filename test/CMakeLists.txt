@@ -1,6 +1,8 @@
 set(TARGET_NAME gtest_${PROJECT_NAME})
 
-set(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/bencode_parser_test.cpp)
+set(SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/bencode_parser_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/bencode_concepts_test.cpp)
 
 find_package(GTest 1.11 REQUIRED)
 find_package(Fmt 8.1 REQUIRED)
