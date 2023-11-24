@@ -12,7 +12,8 @@
 			"ms-vscode.cpptools-extension-pack",
 			"ms-vscode.cmake-tools",
 			"GitHub.vscode-github-actions",
-			"GitHub.vscode-pull-request-github"
+			"GitHub.vscode-pull-request-github",
+			"ms-azuretools.vscode-docker"
 			]
 		}
 	},
