@@ -8,6 +8,7 @@
 #include <map>
 #include <variant>
 #include <vector>
+#include <algorithm>
 
 namespace converter::bencode {
 
