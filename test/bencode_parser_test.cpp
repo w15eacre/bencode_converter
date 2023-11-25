@@ -1,9 +1,10 @@
 #include <bencode_parser.h>
+#include <config.h>
 
 #include <algorithm>
-#include <iterator>
+#include <filesystem>
+#include <fstream>
 #include <string>
-#include <string_view>
 #include <variant>
 
 #include <gtest/gtest.h>
@@ -216,4 +217,21 @@ TEST(BencodeParserTest, ParseDictWhenInvalidKeyType)
     constexpr std::string_view TestDict = "d4:name5:creami23ei100ee";
 
     ASSERT_ANY_THROW(bencode::details::ParseDict<bencode::BaseType>(std::cbegin(TestDict), std::cend(TestDict)));
+}
+
+TEST(BencodeParserTest, ParseTorrentFile)
+{
+    const static std::filesystem::path TorrentFilePath{std::filesystem::path{test::config::ResourcesPath} / "sample.torrent"};
+    ASSERT_TRUE(std::filesystem::exists(TorrentFilePath));
+    ASSERT_TRUE(std::filesystem::is_regular_file(TorrentFilePath));
+
+    std::ifstream torrentFile(TorrentFilePath, std::ios_base::in);
+    ASSERT_TRUE(torrentFile.is_open());
+
+    std::stringstream data;
+    data << torrentFile.rdbuf();
+    const auto& torrentFileData = data.str();
+
+    const auto [it, value] = bencode::details::ParseDict<bencode::BaseType>(std::cbegin(torrentFileData), std::cend(torrentFileData));
+    ASSERT_EQ(it, std::cend(torrentFileData));
 }

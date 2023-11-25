@@ -1,0 +1,9 @@
+#pragma once
+
+#include <string_view>
+
+namespace test::config {
+
+inline static constexpr std::string_view ResourcesPath{"@RESOURCES_PATH@"};
+
+} // namespace test::config

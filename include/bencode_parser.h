@@ -18,6 +18,19 @@ constexpr std::convertible_to<std::string_view> auto Format(fmt::format_string<A
     return fmt::format(pattern, std::forward<Args>(args)...);
 }
 
+template <std::forward_iterator It, typename T>
+It FromChars(It begin, It end, T& result)
+{
+    std::string_view tmp{begin, end};
+    auto [it, error] = std::from_chars(tmp.data(), tmp.data() + tmp.size(), result);
+    if (error != std::errc())
+    {
+        throw std::system_error(std::make_error_code(error));
+    }
+
+    return std::next(begin, std::distance(&*begin, &*it));
+}
+
 namespace type_traits {
 
 constexpr char InvalidSymbol = '\0';
@@ -35,6 +48,21 @@ concept BencodeTypeConcept = requires(T bencode) {
     {
         bencode.AsVariant()
         } -> std::convertible_to<typename T::Variant>;
+};
+
+template <typename T>
+concept BencodeListConcept = requires(T list)
+{
+    requires BencodeTypeConcept<typename T::value_type>;
+    std::back_inserter(list);
+};
+
+template <typename T>
+concept BencodeDictConcept = requires(T dict)
+{
+    requires BencodeTypeConcept<typename T::mapped_type>;
+    requires std::same_as<typename T::key_type, typename T::mapped_type::Str>;
+    dict.insert(std::declval<typename T::value_type>());
 };
 
 template <typename Token>
@@ -226,13 +254,13 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseInt(It b
         }
 
         typename type_traits::BencodeTypeTraits<T>::IntType result{};
-        auto [it, error] = std::from_chars(firstDigit, end, result);
-        if (error == std::errc() && it != end && *it == type_traits::BencodeTypeTraits<T>::GetEndToken())
+        auto it = FromChars(firstDigit, end, result);
+        if (it == end || *it != type_traits::BencodeTypeTraits<T>::GetEndToken())
         {
-            return std::make_pair(std::next(it), T{std::move(result)});
+            throw std::invalid_argument("The int ended unexpectedly");
         }
 
-        throw std::system_error(std::make_error_code(error));
+        return std::make_pair(std::next(it), T{std::move(result)});
     }
     catch (...)
     {
@@ -252,12 +280,7 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseString(I
         }
 
         size_t sizeOf{};
-        auto [sepIt, error] = std::from_chars(begin, end, sizeOf);
-
-        if (error != std::errc())
-        {
-            throw std::system_error(std::make_error_code(error));
-        }
+        auto sepIt = FromChars(begin, end, sizeOf);
 
         if (sepIt == end)
         {
@@ -305,7 +328,7 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseList(It 
                 Format("Expected the first letter '{}', actually {}", ListToken.Token, std::string_view(begin, end)));
         }
 
-        typename type_traits::BencodeTypeTraits<T>::ListType list{};
+        type_traits::BencodeListConcept auto list = typename type_traits::BencodeTypeTraits<T>::ListType{};
 
         auto outputIt = std::back_inserter(list);
 
@@ -349,7 +372,7 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseDict(It 
                 Format("Expected the first letter '{}', actually {}", DictToken.Token, std::string_view(begin, end)));
         }
 
-        typename type_traits::BencodeTypeTraits<T>::DictType dictinary{};
+        type_traits::BencodeDictConcept auto dict = typename type_traits::BencodeTypeTraits<T>::DictType{};
 
         constexpr type_traits::TokenConcept auto EndToken = type_traits::BencodeTypeTraits<T>::GetEndToken();
 
@@ -359,13 +382,13 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseDict(It 
             const auto [keyEndIt, keyVariant] = ParseString<T>(begin, end);
             const auto [valueEndIt, valueVariant] = Parse<T>(keyEndIt, end);
 
-            dictinary.insert(std::pair<typename type_traits::BencodeTypeTraits<T>::StrType, T>(
+            dict.insert(std::pair<typename type_traits::BencodeTypeTraits<T>::StrType, T>(
                 std::get<typename type_traits::BencodeTypeTraits<T>::StrType>(keyVariant), valueVariant));
 
             begin = valueEndIt;
         }
 
-        return std::make_pair(std::next(begin), std::move(dictinary));
+        return std::make_pair(std::next(begin), std::move(dict));
     }
     catch (...)
     {
@@ -388,15 +411,18 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> Parse(It begi
         {
             return ParseInt<T>(begin, end);
         }
-        else if (*begin == type_traits::BencodeTypeTraits<T>::GetListToken())
+
+        if (*begin == type_traits::BencodeTypeTraits<T>::GetListToken())
         {
             return ParseList<T>(begin, end);
         }
-        else if (*begin == type_traits::BencodeTypeTraits<T>::GetDictToken())
+
+        if (*begin == type_traits::BencodeTypeTraits<T>::GetDictToken())
         {
             return ParseDict<T>(begin, end);
         }
-        else if (*begin == type_traits::BencodeTypeTraits<T>::GetStrToken())
+
+        if (*begin == type_traits::BencodeTypeTraits<T>::GetStrToken())
         {
             return ParseString<T>(begin, end);
         }
