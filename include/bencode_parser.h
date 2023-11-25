@@ -2,13 +2,13 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <charconv>
 #include <concepts>
 #include <exception>
 #include <map>
 #include <variant>
 #include <vector>
-#include <algorithm>
 
 namespace converter::bencode {
 
@@ -34,7 +34,7 @@ concept BencodeTypeConcept = requires(T bencode) {
     requires std::convertible_to<T, typename T::Variant>;
     {
         bencode.AsVariant()
-    } -> std::convertible_to<typename T::Variant>;
+        } -> std::convertible_to<typename T::Variant>;
 };
 
 template <typename Token>
