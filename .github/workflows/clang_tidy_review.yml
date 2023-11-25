@@ -18,6 +18,9 @@ jobs:
         # CMake command to run in order to generate compile_commands.json
         cmake_command: cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
+    - name: Upload clang-tidy fixes
+      uses: ZedThree/clang-tidy-review/upload@v0.14.0
+
     # If there are any comments, fail the check
     - if: steps.review.outputs.total_comments > 0
       run: exit 1
