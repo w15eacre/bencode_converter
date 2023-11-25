@@ -16,14 +16,14 @@ jobs:
         sudo apt-get update -y
         sudo apt-get install -y libgtest-dev libfmt-dev
 
-    # Optionally generate compile_commands.json
+    - name: Set up GCC
+      uses: egor-tensin/setup-gcc@v1
+      with:
+        version: latest
+        platform: x64
 
     - uses: ZedThree/clang-tidy-review@v0.14.0
       id: review
-
-    # Uploads an artefact containing clang_fixes.json
-    - uses: ZedThree/clang-tidy-review/upload@v0.14.0
-      id: upload-review
 
     # If there are any comments, fail the check
     - if: steps.review.outputs.total_comments > 0
