@@ -16,12 +16,6 @@ jobs:
         sudo apt-get update -y
         sudo apt-get install -y libgtest-dev libfmt-dev
 
-    - name: Set up GCC
-      uses: egor-tensin/setup-gcc@v1
-      with:
-        version: latest
-        platform: x64
-
     - uses: ZedThree/clang-tidy-review@v0.14.0
       id: review
 
