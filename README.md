@@ -23,6 +23,9 @@ This library allows to unpack a parsed variant to homogeneous/heterogeneous cont
 - [ ] Implements Hono/Getero container for The Dict
 - [ ] Concept of BaseType::Dict and BaseType::Str
 - [ ] CI clang and MSVC
+- [ ] Trasparent for Dictionary
+- [ ] Compare performance with other solution
+- [ ] Check key order in Dict
 - [ ] PVS
 - [ ] Tests
     - [X] type_traits

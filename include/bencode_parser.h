@@ -31,6 +31,7 @@ concept BencodeTypeConcept = requires(T bencode) {
     typename T::Variant;
 
     requires std::convertible_to<T, typename T::Variant>;
+    {bencode.AsVariant()} -> std::convertible_to<typename T::Variant>;
 };
 
 template <typename Token>
@@ -181,6 +182,17 @@ public:
     {
         return m_variant;
     }
+
+    Variant AsVariant() const &
+    {
+        return m_variant;
+    }
+
+    Variant AsVariant() const &&
+    {
+        return std::move(m_variant);
+    }
+
 private:
     std::variant<Int, Str, List, Dict> m_variant{};
 };
@@ -380,7 +392,7 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> Parse(It begi
         }
         else if (*begin == type_traits::BencodeTypeTraits<T>::GetDictToken())
         {
-            std::terminate(); // Hasn't been unimplemented yet.
+            return ParseDict<T>(begin, end);
         }
         else if (*begin == type_traits::BencodeTypeTraits<T>::GetStrToken())
         {

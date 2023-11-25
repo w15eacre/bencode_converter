@@ -42,6 +42,16 @@ type_traits::BencodeTypeTraits<BaseType>::StrType ParseString(std::string_view d
     return std::get<typename type_traits::BencodeTypeTraits<BaseType>::StrType>(variant);
 }
 
+template <typename Dict, typename T>
+void CheckDictItem(Dict& dict, std::string_view key, const T& value)
+{
+    auto it = dict.find(std::string{key}); // FIX ME AFTER Transparancy
+    ASSERT_NE(it, std::cend(dict));
+    const auto [k, v] = *it;
+    ASSERT_EQ(k, key);
+    ASSERT_EQ(std::get<T>(v.AsVariant()), value);
+}
+
 } // namespace
 
 TEST(BencodeParserTest, ParseInt)
@@ -117,7 +127,7 @@ TEST(BencodeParserTest, ParseStringWhenParamWithoutSeparator)
     ASSERT_ANY_THROW(bencode::details::ParseString<bencode::BaseType>(std::cbegin(TestStr), std::cend(TestStr)));
 }
 
-TEST(BencodeParserTest, ParseStringWhenInputWithoutPayload)
+TEST(BencodeParserTest, ParseStringWhenParamWithoutPayload)
 {
     constexpr std::string_view TestStr = "12";
     ASSERT_ANY_THROW(bencode::details::ParseString<bencode::BaseType>(std::cbegin(TestStr), std::cend(TestStr)));
@@ -169,11 +179,41 @@ TEST(BencodeParserTest, ParseListWhenInvalidParam)
     ASSERT_ANY_THROW(bencode::details::ParseList<bencode::BaseType>(std::cbegin(TestList), std::cend(TestList)));
 }
 
-TEST(BencodeParserTest, ParseStringDict)
+TEST(BencodeParserTest, ParseDict)
 {
     constexpr std::string_view TestDict = "d4:name5:cream5:pricei100ee";
 
     const auto [it, value] = bencode::details::ParseDict<bencode::BaseType>(std::cbegin(TestDict), std::cend(TestDict));
     ASSERT_EQ(it, std::cend(TestDict));
-    // TODO(oleg.kuznetsov@internet.ru) Add check value
+    auto dict = std::get<bencode::BaseType::Dict>(value);
+    CheckDictItem(dict, "name", std::string{"cream"});
+    CheckDictItem(dict, "price", int64_t{100});
+}
+
+TEST(BencodeParserTest, ParseDictWhenParamsIsEmpty)
+{
+    constexpr std::string_view TestDict{};
+
+    ASSERT_ANY_THROW(bencode::details::ParseDict<bencode::BaseType>(std::cbegin(TestDict), std::cend(TestDict)));
+}
+
+TEST(BencodeParserTest, ParseDictWhenParamWithoutPrefix)
+{
+    constexpr std::string_view TestDict = "4:name5:cream5:pricei100ee";
+
+    ASSERT_ANY_THROW(bencode::details::ParseDict<bencode::BaseType>(std::cbegin(TestDict), std::cend(TestDict)));
+}
+
+TEST(BencodeParserTest, ParseDictWhenParamWithoutPostfix)
+{
+    constexpr std::string_view TestDict = "d4:name5:cream5:pricei100e";
+
+    ASSERT_ANY_THROW(bencode::details::ParseDict<bencode::BaseType>(std::cbegin(TestDict), std::cend(TestDict)));
+}
+
+TEST(BencodeParserTest, ParseDictWhenInvalidKeyType)
+{
+    constexpr std::string_view TestDict = "d4:name5:creami23ei100ee";
+
+    ASSERT_ANY_THROW(bencode::details::ParseDict<bencode::BaseType>(std::cbegin(TestDict), std::cend(TestDict)));
 }
