@@ -5,29 +5,12 @@ The header-only library to convert to\from bencode format. This is library based
 
 This library allows to unpack a parsed variant to homogeneous/heterogeneous container with C++ types that give you convenient use this library.
 
-### Requires
-- C++20
+### Supported compilers
+- GCC
 
-### Supported compiles
-- [X] - GCC 11.04
-- [ ] - Clang 14
-- [ ]  - MSVC
+### Requirements
+- A Compiler must support C++20
 
 ### Dependencies
 - GTest
 - fmt
-
-#### TODO
-
-- [ ] Implements Hono/Getero container for the List
-- [ ] Implements Hono/Getero container for The Dict
-- [ ] Concept of BaseType::Dict and BaseType::Str
-- [ ] CI clang and MSVC
-- [ ] Trasparent for Dictionary
-- [ ] Compare performance with other solution
-- [ ] Check key order in Dict
-- [ ] PVS
-- [ ] Tests
-    - [X] type_traits
-    - [X] details
-    - [ ] API
