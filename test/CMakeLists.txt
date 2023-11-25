@@ -7,6 +7,11 @@ set(SOURCES
 find_package(GTest 1.11 REQUIRED)
 find_package(Fmt 8.1 REQUIRED)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+get_filename_component(RESOURCES_PATH ${CMAKE_CURRENT_SOURCE_DIR}/resources ABSOLUTE)
+configure_file(config.h.in config.h)
+
 add_executable(${TARGET_NAME} ${SOURCES})
 
 target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -std=c++20)

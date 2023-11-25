@@ -17,6 +17,18 @@ TEST(BencodeParserTest, TypeTraitsConcept)
     ASSERT_TRUE(type_traits::TypeTraitsConcept<type_traits::BencodeTypeTraits<bencode::BaseTypeView>>);
 }
 
+TEST(BencodeParserTest, BencodeDictConcept)
+{
+    ASSERT_TRUE(type_traits::BencodeDictConcept<bencode::BaseTypeView::Dict>);
+    ASSERT_TRUE(type_traits::BencodeDictConcept<bencode::BaseType::Dict>);
+}
+
+TEST(BencodeParserTest, BencodeListConcept)
+{
+    ASSERT_TRUE(type_traits::BencodeListConcept<bencode::BaseTypeView::List>);
+    ASSERT_TRUE(type_traits::BencodeListConcept<bencode::BaseType::List>);
+}
+
 TEST(BencodeParserTest, TokenConcept)
 {
     ASSERT_TRUE(
