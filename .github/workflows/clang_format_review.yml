@@ -2,6 +2,7 @@ name: clang-format-command
 
 on:
   pull_request:
+    branches: [ master ]
     paths:
       - '**.cpp'
       - '**.h'
