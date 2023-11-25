@@ -10,16 +10,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    #Install dependencies
-    - name: Install dependencies
-      run: |
-        sudo apt-get update -y
-
     - uses: ZedThree/clang-tidy-review@v0.14.0
       id: review
       with:
         # List of packages to install
-        apt_packages: libgtest-dev libfmt-dev liblapack-dev
+        apt_packages: libgtest-dev, libfmt-dev, liblapack-dev
         # CMake command to run in order to generate compile_commands.json
         cmake_command: cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
