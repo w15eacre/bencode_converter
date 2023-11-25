@@ -10,6 +10,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    #Install dependencies
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y libgtest-dev libfmt-dev
+
     # Optionally generate compile_commands.json
 
     - uses: ZedThree/clang-tidy-review@v0.14.0
