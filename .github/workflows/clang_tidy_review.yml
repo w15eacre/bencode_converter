@@ -1,7 +1,11 @@
 name: clang-tidy-review
 
 # You can be more specific, but it currently only works on pull requests
-on: [pull_request]
+on:
+  pull_request:
+      paths:
+      - '**.cpp'
+      - '**.h'
 
 jobs:
   build:
@@ -14,8 +18,8 @@ jobs:
       id: review
       with:
         apt_packages: libgtest-dev, libfmt-dev, liblapack-dev
-        token: ${{ secrets.GITHUB_TOKEN }}
         config_file: ".clang-tidy"
+        exclude: "test/*.cpp"
         cmake_command: cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
     - name: Upload clang-tidy fixes
