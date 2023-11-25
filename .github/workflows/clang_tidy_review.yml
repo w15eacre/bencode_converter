@@ -14,10 +14,14 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update -y
-        sudo apt-get install -y libgtest-dev libfmt-dev
 
     - uses: ZedThree/clang-tidy-review@v0.14.0
       id: review
+      with:
+        # List of packages to install
+        apt_packages: libgtest-dev libfmt-dev liblapack-dev
+        # CMake command to run in order to generate compile_commands.json
+        cmake_command: cmake . -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
     # If there are any comments, fail the check
     - if: steps.review.outputs.total_comments > 0
