@@ -19,7 +19,7 @@ std::vector<O> ParseHomogeneousList(std::string_view data)
     const auto [it, variant] = bencode::details::ParseList<BaseType>(std::cbegin(data), std::cend(data));
     [it, data]() {
         ASSERT_EQ(it, std::cend(data));
-        }();
+    }();
 
     auto list = std::get<typename type_traits::BencodeTypeTraits<BaseType>::ListType>(variant);
 
@@ -37,7 +37,7 @@ type_traits::BencodeTypeTraits<BaseType>::StrType ParseString(std::string_view d
     const auto [it, variant] = bencode::details::ParseString<BaseType>(std::cbegin(data), std::cend(data));
     [it, data]() {
         ASSERT_EQ(it, std::cend(data));
-        }();
+    }();
 
     return std::get<typename type_traits::BencodeTypeTraits<BaseType>::StrType>(variant);
 }
