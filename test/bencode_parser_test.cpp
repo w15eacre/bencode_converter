@@ -38,7 +38,7 @@ void ExpectHomogeneousList(std::string_view data, const std::vector<T>& expected
     auto parsedValue = bencode::Parse<bencode::BaseType>(data);
     ASSERT_FALSE(parsedValue.valueless_by_exception());
 
-    ASSERT_EQ((bencode::GetHomogeneousList<T>(parsedValue)), (expectedData));
+    ASSERT_EQ((bencode::GetHomogeneousList<std::vector<T>>(parsedValue)), expectedData);
 }
 
 template <type_traits::BencodeTypeConcept BaseType>

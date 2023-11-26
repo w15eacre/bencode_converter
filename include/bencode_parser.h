@@ -54,7 +54,14 @@ template <typename T>
 concept ListConcept = requires(T list)
 {
     typename T::value_type;
+    requires std::constructible_from<T, size_t>;
+
     std::back_inserter(list);
+    std::cbegin(list);
+    std::cend(list);
+    std::begin(list);
+    std::end(list);
+
     {
         std::size(list)
         } -> std::same_as<size_t>;
@@ -68,11 +75,19 @@ concept BencodeListConcept = requires(T list)
 };
 
 template <typename T>
-concept BencodeDictConcept = requires(T dict)
-{
+concept DictConcept = requires(T dict) {
+    typename T::key_type;
+    typename T::value_type;
+    typename T::mapped_type;
+
+    dict.insert(std::declval<typename T::value_type>());
+};
+
+template <typename T>
+concept BencodeDictConcept = requires(T dict) {
+    requires DictConcept<T>;
     requires BencodeTypeConcept<typename T::mapped_type>;
     requires std::same_as<typename T::key_type, typename T::mapped_type::Str>;
-    dict.insert(std::declval<typename T::value_type>());
 };
 
 template <typename Token>
@@ -466,12 +481,14 @@ type_traits::BencodeTypeTraits<T>::Variant Parse(std::string_view data)
     return value;
 }
 
-template <typename T, typename I, typename S, type_traits::BencodeListConcept L, type_traits::BencodeDictConcept D>
-std::vector<T> GetHomogeneousList(const std::variant<I, S, L, D>& variant)
+template <type_traits::ListConcept Container, typename I, typename S, type_traits::BencodeListConcept L, type_traits::BencodeDictConcept D>
+Container GetHomogeneousList(const std::variant<I, S, L, D>& variant)
 {
+    using T = Container::value_type;
+
     type_traits::BencodeListConcept auto list = std::get<L>(variant);
 
-    std::vector<T> result(list.size());
+    Container result(list.size());
     auto oIt = std::begin(result);
 
     for (std::variant<I, S, L, D> variant : list)
@@ -482,9 +499,10 @@ std::vector<T> GetHomogeneousList(const std::variant<I, S, L, D>& variant)
         }
         else if constexpr (type_traits::ListConcept<T>)
         {
-            *oIt++ = GetHomogeneousList<typename T::value_type>(variant);
+            *oIt++ = GetHomogeneousList<T>(variant);
         }
     }
+
     return result;
 }
 
