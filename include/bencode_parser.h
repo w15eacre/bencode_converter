@@ -51,18 +51,45 @@ concept BencodeTypeConcept = requires(T bencode) {
 };
 
 template <typename T>
+concept ListConcept = requires(T list)
+{
+    typename T::value_type;
+    requires std::constructible_from<T, size_t>;
+
+    std::back_inserter(list);
+    std::cbegin(list);
+    std::cend(list);
+    std::begin(list);
+    std::end(list);
+
+    {
+        std::size(list)
+        } -> std::same_as<size_t>;
+};
+
+template <typename T>
 concept BencodeListConcept = requires(T list)
 {
+    requires ListConcept<T>;
     requires BencodeTypeConcept<typename T::value_type>;
-    std::back_inserter(list);
+};
+
+template <typename T>
+concept DictConcept = requires(T dict)
+{
+    typename T::key_type;
+    typename T::value_type;
+    typename T::mapped_type;
+
+    dict.insert(std::declval<typename T::value_type>());
 };
 
 template <typename T>
 concept BencodeDictConcept = requires(T dict)
 {
+    requires DictConcept<T>;
     requires BencodeTypeConcept<typename T::mapped_type>;
     requires std::same_as<typename T::key_type, typename T::mapped_type::Str>;
-    dict.insert(std::declval<typename T::value_type>());
 };
 
 template <typename Token>
@@ -342,11 +369,11 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseList(It 
         while (*it != EndToken)
         {
             auto [endIt, value] = Parse<T>(it, end);
-            *outputIt = std::move(value);
+            *outputIt++ = std::move(value);
             it = endIt;
         }
 
-        return std::make_pair(end, T{list});
+        return std::make_pair(std::next(it), T{std::move(list)});
     }
     catch (...)
     {
@@ -454,6 +481,31 @@ type_traits::BencodeTypeTraits<T>::Variant Parse(std::string_view data)
     }
 
     return value;
+}
+
+template <type_traits::ListConcept Container, typename I, typename S, type_traits::BencodeListConcept L, type_traits::BencodeDictConcept D>
+Container GetHomogeneousList(const std::variant<I, S, L, D>& variant)
+{
+    using T = Container::value_type;
+
+    type_traits::BencodeListConcept auto list = std::get<L>(variant);
+
+    Container result(list.size());
+    auto oIt = std::begin(result);
+
+    for (std::variant<I, S, L, D> variant : list)
+    {
+        if constexpr (std::is_same_v<T, I> || std::is_same_v<T, S>)
+        {
+            *oIt++ = std::get<T>(variant);
+        }
+        else if constexpr (type_traits::ListConcept<T>)
+        {
+            *oIt++ = GetHomogeneousList<T>(variant);
+        }
+    }
+
+    return result;
 }
 
 } // namespace converter::bencode

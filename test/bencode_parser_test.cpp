@@ -32,6 +32,15 @@ std::vector<O> ParseHomogeneousList(std::string_view data)
     return result;
 }
 
+template <typename T>
+void ExpectHomogeneousList(std::string_view data, const std::vector<T>& expectedData)
+{
+    auto parsedValue = bencode::Parse<bencode::BaseType>(data);
+    ASSERT_FALSE(parsedValue.valueless_by_exception());
+
+    ASSERT_EQ((bencode::GetHomogeneousList<std::vector<T>>(parsedValue)), expectedData);
+}
+
 template <type_traits::BencodeTypeConcept BaseType>
 type_traits::BencodeTypeTraits<BaseType>::StrType ParseString(std::string_view data)
 {
@@ -266,4 +275,46 @@ TEST(BencodeParserTest, FromCharsWhenParamIsInvalid)
               }));
 
     ASSERT_EQ(result, 925);
+}
+
+TEST(BencodeParserTest, GetHomogeneousList)
+{
+    constexpr std::string_view TestList = "l5:jelly4:cake7:custarde";
+    ExpectHomogeneousList(TestList, std::vector<bencode::BaseType::Str>{"jelly", "cake", "custard"});
+
+    constexpr std::string_view TestInt = "li543ei231ee";
+    ExpectHomogeneousList(TestInt, std::vector<bencode::BaseType::Int>{543, 231});
+
+    constexpr std::string_view TestNestedIntList = "lli1ei2eeli3ei4eeli5ei6eee";
+    ExpectHomogeneousList(
+        TestNestedIntList,
+        std::vector<std::vector<bencode::BaseType::Int>>{
+            std::vector<bencode::BaseType::Int>{1, 2},
+            std::vector<bencode::BaseType::Int>{3, 4},
+            std::vector<bencode::BaseType::Int>{5, 6}});
+
+    constexpr std::string_view TestNestedStringList = "ll5:hello5:worldel5:hello5:worldel5:hello5:worldee";
+    ExpectHomogeneousList(
+        TestNestedStringList,
+        std::vector<std::vector<bencode::BaseType::Str>>{
+            std::vector<bencode::BaseType::Str>{"hello", "world"},
+            std::vector<bencode::BaseType::Str>{"hello", "world"},
+            std::vector<bencode::BaseType::Str>{"hello", "world"}});
+
+    constexpr std::string_view TestMoreNestedList = "llli1ei2eeli3ei4eeli5ei6eeelli1ei2eeli3ei4eeli5ei6eeelli1ei2eeli3ei4eeli5ei6eeee";
+    ExpectHomogeneousList(
+        TestMoreNestedList,
+        std::vector<std::vector<std::vector<bencode::BaseType::Int>>>{
+            std::vector<std::vector<bencode::BaseType::Int>>{
+                std::vector<bencode::BaseType::Int>{1, 2},
+                std::vector<bencode::BaseType::Int>{3, 4},
+                std::vector<bencode::BaseType::Int>{5, 6}},
+            std::vector<std::vector<bencode::BaseType::Int>>{
+                std::vector<bencode::BaseType::Int>{1, 2},
+                std::vector<bencode::BaseType::Int>{3, 4},
+                std::vector<bencode::BaseType::Int>{5, 6}},
+            std::vector<std::vector<bencode::BaseType::Int>>{
+                std::vector<bencode::BaseType::Int>{1, 2},
+                std::vector<bencode::BaseType::Int>{3, 4},
+                std::vector<bencode::BaseType::Int>{5, 6}}});
 }
