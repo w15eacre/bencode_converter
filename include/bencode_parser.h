@@ -47,19 +47,20 @@ concept BencodeTypeConcept = requires(T bencode) {
     requires std::convertible_to<T, typename T::Variant>;
     {
         bencode.AsVariant()
-        } -> std::convertible_to<typename T::Variant>;
+    } -> std::convertible_to<typename T::Variant>;
 };
 
 template <typename T>
-concept BencodeListConcept = requires(T list)
-{
+concept BencodeListConcept = requires(T list) {
     requires BencodeTypeConcept<typename T::value_type>;
     std::back_inserter(list);
+    {
+        std::size(list)
+    } -> std::same_as<size_t>;
 };
 
 template <typename T>
-concept BencodeDictConcept = requires(T dict)
-{
+concept BencodeDictConcept = requires(T dict) {
     requires BencodeTypeConcept<typename T::mapped_type>;
     requires std::same_as<typename T::key_type, typename T::mapped_type::Str>;
     dict.insert(std::declval<typename T::value_type>());
@@ -454,6 +455,20 @@ type_traits::BencodeTypeTraits<T>::Variant Parse(std::string_view data)
     }
 
     return value;
+}
+
+template <typename T, type_traits::BencodeTypeConcept B>
+std::vector<T> GetHomogeneousList(const typename type_traits::BencodeTypeTraits<B>::Variant& variant)
+{
+    type_traits::BencodeListConcept auto list = std::get<typename type_traits::BencodeTypeTraits<B>::ListType>(variant);
+
+    std::vector<T> result(list.size());
+
+    std::ranges::transform(list, std::begin(result), [](const type_traits::BencodeTypeTraits<B>::Variant& data) {
+        return std::get<T>(data);
+    });
+
+    return result;
 }
 
 } // namespace converter::bencode

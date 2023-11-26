@@ -143,9 +143,11 @@ TEST(BencodeParserTest, ParseStringWhenPayloadCorrupted)
 TEST(BencodeParserTest, ParseStringList)
 {
     constexpr std::string_view TestList = "l5:jelly4:cake7:custarde";
+    auto parsedValue = bencode::Parse<bencode::BaseType>(TestList);
+    ASSERT_FALSE(parsedValue.valueless_by_exception());
 
     ASSERT_EQ(
-        (ParseHomogeneousList<bencode::BaseType, bencode::BaseType::Str>(TestList)),
+        (bencode::GetHomogeneousList<bencode::BaseType::Str, bencode::BaseType>(parsedValue)),
         (std::vector<bencode::BaseType::Str>{"jelly", "cake", "custard"}));
 }
 
