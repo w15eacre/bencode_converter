@@ -2,11 +2,10 @@ name: clang-format-command
 
 on:
   pull_request:
+    branches: [ master ]
     paths:
       - '**.cpp'
       - '**.h'
-  push:
-    branches: [ master ]
 
 jobs:
   clang-format:

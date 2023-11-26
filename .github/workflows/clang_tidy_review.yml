@@ -3,11 +3,10 @@ name: clang-tidy-review
 # You can be more specific, but it currently only works on pull requests
 on:
   pull_request:
+      branches: [ master ]
       paths:
       - '**.cpp'
       - '**.h'
-  push:
-      branches: [ master ]
 
 jobs:
   build:
