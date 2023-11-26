@@ -51,12 +51,18 @@ concept BencodeTypeConcept = requires(T bencode) {
 };
 
 template <typename T>
-concept BencodeListConcept = requires(T list) {
-    requires BencodeTypeConcept<typename T::value_type>;
+concept ListConcept = requires(T list) {
+    typename T::value_type;
     std::back_inserter(list);
     {
         std::size(list)
     } -> std::same_as<size_t>;
+};
+
+template <typename T>
+concept BencodeListConcept = requires(T list) {
+    requires ListConcept<T>;
+    requires BencodeTypeConcept<typename T::value_type>;
 };
 
 template <typename T>
@@ -343,11 +349,11 @@ std::pair<It, typename type_traits::BencodeTypeTraits<T>::Variant> ParseList(It 
         while (*it != EndToken)
         {
             auto [endIt, value] = Parse<T>(it, end);
-            *outputIt = std::move(value);
+            *outputIt++ = std::move(value);
             it = endIt;
         }
 
-        return std::make_pair(end, T{list});
+        return std::make_pair(std::next(it), T{std::move(list)});
     }
     catch (...)
     {
@@ -457,17 +463,25 @@ type_traits::BencodeTypeTraits<T>::Variant Parse(std::string_view data)
     return value;
 }
 
-template <typename T, type_traits::BencodeTypeConcept B>
-std::vector<T> GetHomogeneousList(const typename type_traits::BencodeTypeTraits<B>::Variant& variant)
+template <typename T, typename I, typename S, type_traits::BencodeListConcept L, type_traits::BencodeDictConcept D>
+std::vector<T> GetHomogeneousList(const std::variant<I, S, L, D>& variant)
 {
-    type_traits::BencodeListConcept auto list = std::get<typename type_traits::BencodeTypeTraits<B>::ListType>(variant);
+    type_traits::BencodeListConcept auto list = std::get<L>(variant);
 
     std::vector<T> result(list.size());
+    auto oIt = std::begin(result);
 
-    std::ranges::transform(list, std::begin(result), [](const type_traits::BencodeTypeTraits<B>::Variant& data) {
-        return std::get<T>(data);
-    });
-
+    for (std::variant<I, S, L, D> variant : list)
+    {
+        if constexpr (std::is_same_v<T, I> || std::is_same_v<T, S>)
+        {
+            *oIt++ = std::get<T>(variant);
+        }
+        else if constexpr (type_traits::ListConcept<T>)
+        {
+            *oIt++ = GetHomogeneousList<typename T::value_type>(variant);
+        }
+    }
     return result;
 }
 
