@@ -75,7 +75,8 @@ concept BencodeListConcept = requires(T list)
 };
 
 template <typename T>
-concept DictConcept = requires(T dict) {
+concept DictConcept = requires(T dict)
+{
     typename T::key_type;
     typename T::value_type;
     typename T::mapped_type;
@@ -84,7 +85,8 @@ concept DictConcept = requires(T dict) {
 };
 
 template <typename T>
-concept BencodeDictConcept = requires(T dict) {
+concept BencodeDictConcept = requires(T dict)
+{
     requires DictConcept<T>;
     requires BencodeTypeConcept<typename T::mapped_type>;
     requires std::same_as<typename T::key_type, typename T::mapped_type::Str>;
