@@ -235,3 +235,35 @@ TEST(BencodeParserTest, ParseTorrentFile)
     const auto [it, value] = bencode::details::ParseDict<bencode::BaseType>(std::cbegin(torrentFileData), std::cend(torrentFileData));
     ASSERT_EQ(it, std::cend(torrentFileData));
 }
+
+TEST(BencodeParserTest, FromChars)
+{
+    constexpr std::string_view IntStr = "09251995";
+
+    size_t result{};
+    auto it = bencode::FromChars(std::cbegin(IntStr), std::cend(IntStr), result);
+    ASSERT_EQ(it, std::cend(IntStr));
+
+    ASSERT_EQ(result, 9251995);
+}
+
+TEST(BencodeParserTest, FromCharsWhenParamIsEmpty)
+{
+    constexpr std::string_view IntStr{};
+
+    size_t result{};
+    ASSERT_THROW(bencode::FromChars(std::cbegin(IntStr), std::cend(IntStr), result), std::system_error);
+}
+
+TEST(BencodeParserTest, FromCharsWhenParamIsInvalid)
+{
+    constexpr std::string_view IntStr = "0925a1995";
+
+    size_t result{};
+    auto it = bencode::FromChars(std::cbegin(IntStr), std::cend(IntStr), result);
+    ASSERT_EQ(it, std::find_if(std::cbegin(IntStr), std::cend(IntStr), [](auto ch) {
+                  return !std::isdigit(ch);
+              }));
+
+    ASSERT_EQ(result, 925);
+}
